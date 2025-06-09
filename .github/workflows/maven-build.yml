@@ -126,11 +126,12 @@ jobs:
   
     - name: Zip the Spring Boot JAR
       run: |
+          rm -f build-artifacts # remove file if exists
           mkdir -p build-artifacts
           cd ${{ inputs.SERVICE_LOCATION }}/target
           JAR_FILE=$(ls *.jar | grep -v 'original-' | head -n 1) # Selects your built jar
           echo "Found JAR file: $JAR_FILE"
-          cp "$JAR_FILE" ../../build-artifacts/
+          cp "$JAR_FILE" ../../../build-artifacts/
           cd ../../build-artifacts
           zip ${{ inputs.BUILD_ARTIFACT }}.zip "$JAR_FILE"
           mv ${{ inputs.BUILD_ARTIFACT }}.zip ../
