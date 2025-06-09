@@ -126,7 +126,7 @@ jobs:
     - name: Zip the Spring Boot JAR
       run: |
         mkdir -p build-artifacts
-        cp target/${{ inputs.BUILD_ARTIFACT }}*.jar build-artifacts/
+        cp ${{ inputs.SERVICE_LOCATION }}/target/${{ inputs.BUILD_ARTIFACT }}*.jar build-artifacts/
         cd build-artifacts
         zip ${{ inputs.BUILD_ARTIFACT }}.zip ${{ inputs.BUILD_ARTIFACT }}*.jar
         mv ${{ inputs.BUILD_ARTIFACT }}.zip ../
