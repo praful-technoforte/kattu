@@ -123,13 +123,15 @@ jobs:
               echo "Warning: ARTIFACT $ARTIFACT not found"
             fi
           done
+  
     - name: Zip the Spring Boot JAR
       run: |
-        mkdir -p build-artifacts
-        cp ${{ inputs.SERVICE_LOCATION }}/target/${{ inputs.BUILD_ARTIFACT }}*.jar build-artifacts/
-        cd build-artifacts
-        zip ${{ inputs.BUILD_ARTIFACT }}.zip ${{ inputs.BUILD_ARTIFACT }}*.jar
-        mv ${{ inputs.BUILD_ARTIFACT }}.zip ../
+          mkdir -p build-artifacts
+          cd ${{ inputs.SERVICE_LOCATION }}
+          cp target/${{ inputs.BUILD_ARTIFACT }}*.jar ../build-artifacts/
+          cd ../build-artifacts
+          zip ${{ inputs.BUILD_ARTIFACT }}.zip ${{ inputs.BUILD_ARTIFACT }}*.jar
+          mv ${{ inputs.BUILD_ARTIFACT }}.zip ../
 
     - name: Upload the springboot jars
       if: ${{ !contains(github.ref, 'master') || !contains(github.ref, 'main') }}
