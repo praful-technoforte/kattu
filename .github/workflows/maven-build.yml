@@ -126,16 +126,34 @@ jobs:
   
     - name: Zip the Spring Boot JAR
       run: |
-          rm -f build-artifacts # remove file if exists
-          mkdir -p build-artifacts
-          cd ${{ inputs.SERVICE_LOCATION }}/target
-          JAR_FILE=$(ls *.jar | grep -v 'original-' | head -n 1) # Selects your built jar
-          echo "Found JAR file: $JAR_FILE"
-          cp "$JAR_FILE" ../../../build-artifacts/
-          cd ../../build-artifacts
-          zip ${{ inputs.BUILD_ARTIFACT }}.zip "$JAR_FILE"
-          mv ${{ inputs.BUILD_ARTIFACT }}.zip ../
-
+        # Clean up any previous artifacts
+        rm -rf build-artifacts
+        mkdir -p build-artifacts
+    
+        # Find the main JAR file
+        JAR_PATH=$(find "${{ inputs.SERVICE_LOCATION }}/target" -maxdepth 1 -name "*.jar" ! -name "*original*" | head -n 1)
+    
+        if [ -z "$JAR_PATH" ]; then
+          echo "::error::No JAR file found in ${{ inputs.SERVICE_LOCATION }}/target"
+          ls -la "${{ inputs.SERVICE_LOCATION }}/target"
+          exit 1
+        fi
+    
+        echo "Found JAR file: $JAR_PATH"
+    
+        # Get just the filename
+        JAR_FILE=$(basename "$JAR_PATH")
+    
+        # Copy to build artifacts
+        cp "$JAR_PATH" "build-artifacts/"
+    
+        # Create ZIP
+        cd build-artifacts
+        zip "${{ inputs.BUILD_ARTIFACT }}.zip" "$JAR_FILE"
+        mv "${{ inputs.BUILD_ARTIFACT }}.zip" ../
+    
+        echo "Created ZIP file:"
+        ls -la ../"${{ inputs.BUILD_ARTIFACT }}.zip"
 
     - name: Upload the springboot jars
       if: ${{ !contains(github.ref, 'master') || !contains(github.ref, 'main') }}
