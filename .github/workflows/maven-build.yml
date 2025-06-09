@@ -128,9 +128,8 @@ jobs:
         mkdir -p build-artifacts
         cp target/${{ inputs.BUILD_ARTIFACT }}*.jar build-artifacts/
         cd build-artifacts
-        zip ${{
-        inputs.BUILD_ARTIFACT
-        }}.zip ${{ inputs.BUILD_ARTIFACT }}*.jar
+        zip ${{ inputs.BUILD_ARTIFACT }}.zip ${{ inputs.BUILD_ARTIFACT }}*.jar
+        mv ${{ inputs.BUILD_ARTIFACT }}.zip ../
 
     - name: Upload the springboot jars
       if: ${{ !contains(github.ref, 'master') || !contains(github.ref, 'main') }}
