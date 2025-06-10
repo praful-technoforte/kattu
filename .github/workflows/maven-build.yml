@@ -124,7 +124,7 @@ jobs:
             fi
           done
   
-    - name: Zip the Spring Boot JAR (Fixed Version)
+    - name: Zip the Spring Boot JAR
       run: |
           # Find the JAR file
           JAR_PATH=$(find "${{ inputs.SERVICE_LOCATION }}/target" -name "*.jar" ! -name "*original*" | head -n 1)
@@ -136,20 +136,14 @@ jobs:
           fi
 
           echo "Found JAR file: $JAR_PATH"
-
-          # Navigate to the service location (parent of target)
-          cd "${{ inputs.SERVICE_LOCATION }}"
       
-          # Create ZIP including the target directory structure
-          zip -r "target/${{ inputs.BUILD_ARTIFACT }}.zip" target/*.jar
+          # Navigate to target and create ZIP there
+          cd "${{ inputs.SERVICE_LOCATION }}/target"
+          JAR_FILENAME=$(basename "$JAR_PATH")
+          zip -r "${{ inputs.BUILD_ARTIFACT }}.zip" "$JAR_FILENAME"
       
-          # Verify ZIP was created in target folder
-          echo "Contents of target directory after ZIP creation:"
-          ls -la target/
-      
-          # Verify ZIP contents
-          echo "ZIP file contents:"
-          unzip -l "target/${{ inputs.BUILD_ARTIFACT }}.zip"
+          echo "ZIP created in target directory:"
+          ls -la "${{ inputs.BUILD_ARTIFACT }}.zip"
 
     - name: Upload the springboot jars
       if: ${{ !contains(github.ref, 'master') || !contains(github.ref, 'main') }}
