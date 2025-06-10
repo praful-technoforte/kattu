@@ -128,21 +128,22 @@ jobs:
       run: |
           echo "SERVICE_LOCATION: ${{ inputs.SERVICE_LOCATION }}"
           echo "BUILD_ARTIFACT: ${{ inputs.BUILD_ARTIFACT }}"
-      
-          # Find the JAR file
-          JAR_PATH=$(find "${{ inputs.SERVICE_LOCATION }}/target" -name "*.jar" ! -name "*original*" | head -n 1)
 
-          if [ -z "$JAR_PATH" ]; then
-              echo "::error::No JAR file found in ${{ inputs.SERVICE_LOCATION }}/target"
+          # Find all JAR files excluding original, sources, javadoc jars
+          JAR_PATHS=$(find "${{ inputs.SERVICE_LOCATION }}/target" -name "*.jar" \
+                ! -name "*original*" ! -name "*sources*" ! -name "*javadoc*")
+
+          if [ -z "$JAR_PATHS" ]; then
+              echo "::error::No valid JAR files found in ${{ inputs.SERVICE_LOCATION }}/target"
               ls -la "${{ inputs.SERVICE_LOCATION }}/target" || echo "Target directory doesn't exist"
               exit 1
           fi
 
-          echo "Found JAR file: $JAR_PATH"
-      
-          # Create ZIP in current directory
-          zip -j "${{ inputs.BUILD_ARTIFACT }}.zip" "$JAR_PATH"
-      
+          echo "Found JAR files: $JAR_PATHS"
+
+          # Create ZIP in current directory with only required JARs
+          zip -j "${{ inputs.BUILD_ARTIFACT }}.zip" $JAR_PATHS
+
           # Verify ZIP was created
           echo "ZIP created: ${{ inputs.BUILD_ARTIFACT }}.zip"
           ls -la "${{ inputs.BUILD_ARTIFACT }}.zip"
