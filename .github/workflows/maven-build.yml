@@ -140,29 +140,12 @@ jobs:
 
           echo "Found JAR file: $JAR_PATH"
       
-          # Create ZIP with the directory structure that Docker expects
-          # Docker expects: "../print/target/*" inside the ZIP
-          # So we need to create a ZIP that contains the relative path structure
+          # Create ZIP in current directory
+          zip -j "${{ inputs.BUILD_ARTIFACT }}.zip" "$JAR_PATH"
       
-          # Create temporary directory structure using SERVICE_NAME
-          mkdir -p "temp-zip-structure/${{ inputs.SERVICE_NAME }}/target"
-      
-          # Copy JAR to the expected structure
-          cp "$JAR_PATH" "temp-zip-structure/${{ inputs.SERVICE_NAME }}/target/"
-      
-          # Create ZIP from the root of temp structure
-          cd temp-zip-structure
-          zip -r "../${{ inputs.BUILD_ARTIFACT }}.zip" "${{ inputs.SERVICE_NAME }}/target/"
-          cd ..
-      
-          # Clean up temp directory
-          rm -rf temp-zip-structure
-      
-          # Verify ZIP was created and show contents
+          # Verify ZIP was created
           echo "ZIP created: ${{ inputs.BUILD_ARTIFACT }}.zip"
           ls -la "${{ inputs.BUILD_ARTIFACT }}.zip"
-          echo "ZIP contents (this should show ${{ inputs.SERVICE_NAME }}/target/your-jar-file.jar):"
-          unzip -l "${{ inputs.BUILD_ARTIFACT }}.zip"
   
     - name: Upload the springboot jars
       if: ${{ !contains(github.ref, 'master') || !contains(github.ref, 'main') }}
