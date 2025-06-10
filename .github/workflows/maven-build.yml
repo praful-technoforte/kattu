@@ -124,27 +124,26 @@ jobs:
             fi
           done
   
-    - name: Zip the Spring Boot JAR
+    - name: Zip Maven JAR Artifacts (for single & multi-module)
       run: |
           echo "SERVICE_LOCATION: ${{ inputs.SERVICE_LOCATION }}"
           echo "BUILD_ARTIFACT: ${{ inputs.BUILD_ARTIFACT }}"
 
-          # Find all JAR files excluding original, sources, javadoc jars
-          JAR_PATHS=$(find "${{ inputs.SERVICE_LOCATION }}/target" -name "*.jar" \
-                ! -name "*original*" ! -name "*sources*" ! -name "*javadoc*")
+          # Find all valid JAR files in 'target' folders inside SERVICE_LOCATION
+          JAR_PATHS=$(find "${{ inputs.SERVICE_LOCATION }}" -type f -path "*/target/*.jar" \
+                ! -name "*original*" ! -name "*sources*" ! -name "*javadoc*" )
 
           if [ -z "$JAR_PATHS" ]; then
-              echo "::error::No valid JAR files found in ${{ inputs.SERVICE_LOCATION }}/target"
-              ls -la "${{ inputs.SERVICE_LOCATION }}/target" || echo "Target directory doesn't exist"
+              echo "::error::No valid JAR files found in any 'target' directory under ${{ inputs.SERVICE_LOCATION }}"
+              find "${{ inputs.SERVICE_LOCATION }}" -type d
               exit 1
           fi
 
           echo "Found JAR files: $JAR_PATHS"
 
-          # Create ZIP in current directory with only required JARs
+          # Create ZIP with all found JARs
           zip -j "${{ inputs.BUILD_ARTIFACT }}.zip" $JAR_PATHS
 
-          # Verify ZIP was created
           echo "ZIP created: ${{ inputs.BUILD_ARTIFACT }}.zip"
           ls -la "${{ inputs.BUILD_ARTIFACT }}.zip"
   
