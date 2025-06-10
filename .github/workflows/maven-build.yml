@@ -126,29 +126,30 @@ jobs:
   
     - name: Zip the Spring Boot JAR (Fixed Version)
       run: |
-          # Clean up any previous artifacts
-          rm -rf build-artifacts
-          mkdir -p build-artifacts
-    
-          # Copy the JAR with its directory structure
+          # Find the JAR file
           JAR_PATH=$(find "${{ inputs.SERVICE_LOCATION }}/target" -name "*.jar" ! -name "*original*" | head -n 1)
-    
+
           if [ -z "$JAR_PATH" ]; then
-            echo "::error::No JAR file found in ${{ inputs.SERVICE_LOCATION }}/target"
-            ls -la "${{ inputs.SERVICE_LOCATION }}/target"
-            exit 1
+              echo "::error::No JAR file found in ${{ inputs.SERVICE_LOCATION }}/target"
+              ls -la "${{ inputs.SERVICE_LOCATION }}/target"
+              exit 1
           fi
-    
+
           echo "Found JAR file: $JAR_PATH"
-    
-          # Create the target directory structure in build-artifacts
-          mkdir -p "build-artifacts/target"
-          cp "$JAR_PATH" "build-artifacts/target/"
-    
-          # Create ZIP preserving directory structure
-          cd build-artifacts
-          zip -r "${{ inputs.BUILD_ARTIFACT }}.zip" .
-          mv "${{ inputs.BUILD_ARTIFACT }}.zip" ../
+
+          # Navigate to the service location (parent of target)
+          cd "${{ inputs.SERVICE_LOCATION }}"
+      
+          # Create ZIP including the target directory structure
+          zip -r "target/${{ inputs.BUILD_ARTIFACT }}.zip" target/*.jar
+      
+          # Verify ZIP was created in target folder
+          echo "Contents of target directory after ZIP creation:"
+          ls -la target/
+      
+          # Verify ZIP contents
+          echo "ZIP file contents:"
+          unzip -l "target/${{ inputs.BUILD_ARTIFACT }}.zip"
 
     - name: Upload the springboot jars
       if: ${{ !contains(github.ref, 'master') || !contains(github.ref, 'main') }}
